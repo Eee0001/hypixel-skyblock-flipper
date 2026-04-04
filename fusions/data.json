@@ -1400,7 +1400,8 @@
     "fusion": [
       {
         "shard": [
-          "SHARD_INVISIBUG_AND_TERMITE"
+          "SHARD_INVISIBUG",
+          "SHARD__TERMITE"
         ]
       },
       {
@@ -1587,7 +1588,7 @@
       },
       {
         "shard": [
-          "SHARD_CAVE_DWELLER_FAMILY_OR_ABYSSAL_LANTERNFISH"
+          "SHARD_ABYSSAL_LANTERNFISH"
         ],
         "family": [
           "Cave Dweller"
@@ -1790,7 +1791,8 @@
     "fusion": [
       {
         "shard": [
-          "SHARD_PHANPYRE_AND_PHANFLARE"
+          "SHARD_PHANPYRE",
+          "SHARD__PHANFLARE"
         ]
       },
       {
@@ -1843,7 +1845,7 @@
       },
       {
         "shard": [
-          "SHARD_CAVE_DWELLER_FAMILY_OR_SILENTDEPTH"
+          "SHARD_SILENTDEPTH"
         ],
         "family": [
           "Cave Dweller"
@@ -2636,7 +2638,13 @@
       },
       {
         "shard": [
-          "SHARD_BEZALSHARD_OR_CINDERBATSHARD_OR_FLARESHARD_OR_LAVA_FLAMESHARD_OR_FIRE_EELSHARD_OR_BALSHARD_OR_AND_FLAMING_SPIDER"
+          "SHARD_BEZAL",
+          "SHARD_CINDERBAT",
+          "SHARD_FLARE",
+          "SHARD_LAVA_FLAME",
+          "SHARD_FIRE_EEL",
+          "SHARD_BAL",
+          "SHARD_FLAMING_SPIDER"
         ]
       }
     ]

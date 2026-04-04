@@ -64,7 +64,9 @@ for (let shard of tableData) {
     
     const fusion = shard.obtaining.match(/(?<=Fusing ).+?(?=\.)/g)?.[0]
         .replaceAll("\"\t\"", "")
-        .replaceAll(", ", "Shard or ")
+        .replaceAll(", and", " Shard or")
+        .replaceAll(", ", " Shard or ")
+        .replace(/(and)((?:(?!and).)*?)(Shards)/g, "Shard or $2Shard")
         .replaceAll("Shards", "Shard")
         .replaceAll("Common", "COMMON")
         .replaceAll("Uncommon", "UNCOMMON")
@@ -80,8 +82,17 @@ for (let shard of tableData) {
     const slots = [{}, {}];
     
     for (let i = 0; i < 2; i++) {
-        slots[i].shard = fusion?.[i].match(/(<= or |^).*?(?= Shard)/g) ?? undefined;
+
+        let shardRegexResult1 = fusion ? [...fusion[i].matchAll(/(?<= or | and |^).*?(?= Shard)/g)].flat() : null;
+        let shardRegexResult2 = fusion ? [...fusion[i].matchAll(/(?<= or | and ).*?(?= Shard)/g)].flat() : null;
         
+        if (shardRegexResult1?.length === 1 && shardRegexResult2?.length === 1) {
+            slots[i].shard = shardRegexResult2[0].length < shardRegexResult1[0].length ? shardRegexResult2 : shardRegexResult1;
+        }
+        else {
+            slots[i].shard = shardRegexResult1?.length !== 0 ? shardRegexResult1 : undefined;
+        }
+
         slots[i].shard = slots[i].shard?.map((name)=>{ return "SHARD_" + name.toUpperCase().replaceAll(" ", "_"); }) ?? undefined;
         
         slots[i].category = fusion?.[i].match(/(?<= and | or |^).*?(?= Category)/g) ?? undefined;
