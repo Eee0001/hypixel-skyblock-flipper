@@ -8,6 +8,8 @@ const properties = {"0": "name", "1": "rarity", "2": "id", "3": "category", "4":
 
 const tableData = [];
 
+const fusionData = {};
+
 for (let table of document.getElementsByClassName("wikitable sortable jquery-tablesorter")) {
     for (let i = 1; i < table.rows.length; i++){
         let row = table.rows[i];
@@ -25,17 +27,11 @@ for (let table of document.getElementsByClassName("wikitable sortable jquery-tab
 
 }
 
-//--------------------------------------------------------------------------------
-// FORMATS FUSION DATA PREVIOUSLY COLLECTED
-//--------------------------------------------------------------------------------
-
-const fusions = {}; // (Data that needs to be pasted into data.json)
-
 for (let shard of tableData) {
 
     const id = "SHARD_" + shard.name.replaceAll(" ", "_");
     
-    fusions[id] = {
+    fusionData[id] = {
         id: Number(shard.id), 
         rarity: shard.rarity,
         
@@ -55,8 +51,8 @@ for (let shard of tableData) {
     const slots = [{}, {}];
     
     for (let i = 0; i < 2; i++) {
-        let shardRegex1 = fusion ? [...fusion[i].matchAll(/(?<= OR | AND |^).*?(?= SHARD)/g)].flat() : null;
-        let shardRegex2 = fusion ? [...fusion[i].matchAll(/(?<= OR | AND ).*?(?= SHARD)/g)].flat() : null;
+        let shardRegex1 = fusion ? [...fusion[i].matchAll(/(?<= OR | AND |^).*?(?= SHARD)/g)].flat() : undefined;
+        let shardRegex2 = fusion ? [...fusion[i].matchAll(/(?<= OR | AND ).*?(?= SHARD)/g)].flat() : undefined;
         
         if (shardRegex1?.length === 1 && shardRegex2?.length === 1) {
             slots[i].shard = shardRegex2[0].length < shardRegex1[0].length ? shardRegex2 : shardRegex1;
@@ -72,11 +68,11 @@ for (let shard of tableData) {
         slots[i].rarity = fusion?.[i].match(/COMMON|UNCOMMON|RARE|EPIC|LEGENDARY/g) ?? undefined;
     }
     
-    if (Object.values(slots[0]).filter(p => p !== undefined).length > 0) fusions[id].fusion = slots;
+    if (Object.values(slots[0]).filter(p => p !== undefined).length > 0) fusionData[id].fusion = slots;
     
-    fusions[id].origin = shard.origin !== "—" ? shard.origin.split(", ") : undefined;
-    fusions[id].origin = fusions[id].origin?.map((name)=>{ return "SHARD_" + name.replaceAll(" ", "_"); }) ?? undefined;
+    fusionData[id].origin = shard.origin !== "—" ? shard.origin.split(", ") : undefined;
+    fusionData[id].origin = fusionData[id].origin?.map((name)=>{ return "SHARD_" + name.replaceAll(" ", "_"); }) ?? undefined;
 
 }
 
-console.log(fusions);
+console.log(fusionData);
