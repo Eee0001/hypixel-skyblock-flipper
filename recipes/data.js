@@ -39,6 +39,8 @@ for (let id of ids) {
             
             let table = tables[0];
             
+            id = id.replaceAll("ENCHANTED_BOOK_", "ENCHANTMENT_");
+            
             recipes[id] = [];
             
             for (let i = 1; i < table.rows.length; i++) {
@@ -52,11 +54,15 @@ for (let id of ids) {
                 
                 let list = element.children[1];
                 
+                let validRecipe = true;
+                
                 for (let point of list.children) {
                     recipe.items.push({
                         amount: Number(point.textContent.split(" ")[0]),
-                        item: point.children[1].textContent
+                        item: [...point.children].at(-1).textContent
                     });
+                    
+                    if (recipe.at(-1) < 1) validRecipe = false;
                 }
                 
                 recipes[id].push(recipe);
