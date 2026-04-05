@@ -8,7 +8,7 @@ const recipeData = {};
 
 const listData = [...document.getElementById("mw-whatlinkshere-list").children]
     .map((element)=>{ return element.getElementsByTagName("a")[0].href.split("/").at(-1); })
-    .filter((id)=>{ return id.toUpperCase === id; });
+    .filter((id)=>{ return id.toUpperCase() === id; });
 
 for (let id of listData) {
     if (recipeData[id]) continue;
@@ -33,22 +33,22 @@ for (let id of listData) {
             
                 let recipe = { amount: 0, items: [] };
                 
-                recipe.amount = Number(table.getElementsByClassName("color-green")[0].textContent);
+                recipe.amount = Number(table.getElementsByClassName("color-green")[i - 1].textContent.split(" ")[0]);
                 
                 let valid = true;
                 
-                for (let point of table.getElementsByTagName("ul")[0]) {
+                for (let point of table.rows[i].getElementsByTagName("ul")[0].children) {
                 
                     recipe.items.push({
-                        amount: Number(point.textContent.split(" ")[0]),
-                        item: [...point.children].at(-1).textContent
+                        amount: Number(point.textContent.split(" ")[0].replaceAll(",", "")),
+                        item: point.getElementsByTagName("a")[1].textContent
                     });
                     
-                    valid = recipe.at(-1) > 0;
+                    valid = recipe.items.at(-1).amount > 0;
                 
                 }
                 
-                recipeData[id].push(recipe);
+                if (valid) recipeData[id].push(recipe);
             
             }
         
