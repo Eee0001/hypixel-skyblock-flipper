@@ -12,21 +12,15 @@ const ids = [...document.getElementById("mw-whatlinkshere-list").children].map((
     return el.children[0].children[0].href.split("/").at(-1);
 }).filter((str)=>{ return str.toUpperCase() === str; });
 
-// (If rate limit hit run the following code in the same webpage console after waiting a bit)
-
-let error = false;
-
 for (let id of ids) {
 
     if (successfullRequests[id]) continue; 
-    if (rateLimitHit) break;
     
     console.log(Object.keys(recipes).length + " Recipes Fetched");
     
     await fetch("https://wiki.hypixel.net/Template:Recipe_Tree/" + id)
         .then((response)=>{ 
             if (response.status === 200) successfullRequests[id] = true; 
-            if (response.status !== 200) error = true;
             return response.text(); 
         })
         .then((result)=>{
