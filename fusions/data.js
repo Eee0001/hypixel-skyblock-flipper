@@ -4,23 +4,13 @@
 
 // (Run in the console of the urls webpage then paste data into data.json)
 
-const tableList = ["Common_", "Uncommon_", "Rare_", "Epic_", "Legendary_"];
-
-const properties = {
-    "0": "name", 
-    "1": "rarity", 
-    "2": "id", 
-    "3": "category", 
-    "4": "family", 
-    "6": "obtaining",
-    "10": "origin"
-};
+const properties = {"0": "name", "1": "rarity", "2": "id", "3": "category", "4": "family", "6": "obtaining","10": "origin"};
 
 const tableData = [];
 
-for (let id of tableList) {
-    let table = document.getElementById(id).firstElementChild;
-    
+const fusionData = {};
+
+for (let table of document.getElementsByClassName("wikitable sortable jquery-tablesorter")) {
     for (let i = 1; i < table.rows.length; i++){
         let row = table.rows[i];
         
@@ -29,83 +19,60 @@ for (let id of tableList) {
         for (let j = 0; j < row.cells.length; j++) {
             let cell = row.cells[j];
             
-            let property = properties[j];
-            
-            if (property) tableData.at(-1)[property] = cell.textContent
-                .replaceAll("\"\t\"", "")
-                .trim();
+            if (properties[j]) tableData.at(-1)[properties[j]] = cell.textContent.replaceAll("\"\t\"", "").toUpperCase().trim();
         
         }
     
     }
 
 }
-
-//--------------------------------------------------------------------------------
-// FORMATS FUSION DATA
-//--------------------------------------------------------------------------------
-
-const data = {};
 
 for (let shard of tableData) {
 
-    const id = "SHARD_" + shard.name.toUpperCase().replaceAll(" ", "_");
+    const id = "SHARD_" + shard.name.replaceAll(" ", "_");
     
-    data[id] = {};
-    
-    data[id].name = shard.name;
-    
-    data[id].rarity = shard.rarity;
-    
-    data[id].id = Number(shard.id);
-    
-    data[id].category = shard.category.split(", ");
-    data[id].family = shard.family.split(", ");
+    fusionData[id] = {
+        id: Number(shard.id), 
+        rarity: shard.rarity,
+        
+        category: shard.category.split(", "),
+        family: shard.family.split(", "),
+    };
     
     const fusion = shard.obtaining.match(/(?<=Fusing ).+?(?=\.)/g)?.[0]
-        .replaceAll("\"\t\"", "")
-        .replaceAll(", and", " Shard or")
-        .replaceAll(", ", " Shard or ")
-        .replace(/(and)((?:(?!and).)*?)(Shards)/g, "Shard or $2Shard")
-        .replaceAll("Shards", "Shard")
-        .replaceAll("Common", "COMMON")
-        .replaceAll("Uncommon", "UNCOMMON")
-        .replaceAll("Rare", "RARE")
-        .replaceAll("Epic", "EPIC")
-        .replaceAll("Legendary", "LEGENDARY")
-        .replaceAll("COMMON or higher", "COMMON or UNCOMMON or higher")
-        .replaceAll("UNCOMMON or higher", "UNCOMMON or RARE or higher")
-        .replaceAll("RARE or higher", "RARE or EPIC or higher")
-        .replaceAll("EPIC or higher", "EPIC or LEGENDARY")
-        .split(" with ");
-        
+        .replaceAll(/, AND|, /g, "SHARD OR")
+        .replace(/(AND)((?:(?!AND).)*?)(SHARDS)/g, "SHARD OR $2SHARD")
+        .replaceAll("COMMON OR HIGHER", "COMMON OR UNCOMMON OR HIGHER")
+        .replaceAll("UNCOMMON OR HIGHER", "UNCOMMON OR RARE OR higher")
+        .replaceAll("RARE OR HIGHER", "RARE OR EPIC OR HIGHER")
+        .replaceAll("EPIC OR HIGHER", "EPIC OR LEGENDARY")
+        .split(" WITH ");
+    
     const slots = [{}, {}];
     
     for (let i = 0; i < 2; i++) {
-
-        let shardRegexResult1 = fusion ? [...fusion[i].matchAll(/(?<= or | and |^).*?(?= Shard)/g)].flat() : null;
-        let shardRegexResult2 = fusion ? [...fusion[i].matchAll(/(?<= or | and ).*?(?= Shard)/g)].flat() : null;
+        let shardRegex1 = fusion ? [...fusion[i].matchAll(/(?<= OR | AND |^).*?(?= SHARD)/g)].flat() : undefined;
+        let shardRegex2 = fusion ? [...fusion[i].matchAll(/(?<= OR | AND ).*?(?= SHARD)/g)].flat() : undefined;
         
-        if (shardRegexResult1?.length === 1 && shardRegexResult2?.length === 1) {
-            slots[i].shard = shardRegexResult2[0].length < shardRegexResult1[0].length ? shardRegexResult2 : shardRegexResult1;
+        if (shardRegex1?.length === 1 && shardRegex2?.length === 1) {
+            slots[i].shard = shardRegex2[0].length < shardRegex1[0].length ? shardRegex2 : shardRegex1;
         }
         else {
-            slots[i].shard = shardRegexResult1?.length !== 0 ? shardRegexResult1 : undefined;
+            slots[i].shard = shardRegex1?.length !== 0 ? shardRegex1 : undefined;
         }
 
-        slots[i].shard = slots[i].shard?.map((name)=>{ return "SHARD_" + name.toUpperCase().replaceAll(" ", "_"); }) ?? undefined;
+        slots[i].shard = slots[i].shard?.map((name)=>{ return "SHARD_" + name.replaceAll(" ", "_"); }) ?? undefined;
         
-        slots[i].category = fusion?.[i].match(/(?<= and | or |^).*?(?= Category)/g) ?? undefined;
-        slots[i].family = fusion?.[i].match(/(?<= and | or |^).*?(?= Family)/g) ?? undefined;
+        slots[i].category = fusion?.[i].match(/(?<= AND | OR |^).*?(?= CATEGORY)/g) ?? undefined;
+        slots[i].family = fusion?.[i].match(/(?<= AND | OR |^).*?(?= FAMILY)/g) ?? undefined;
         slots[i].rarity = fusion?.[i].match(/COMMON|UNCOMMON|RARE|EPIC|LEGENDARY/g) ?? undefined;
     }
     
-    if (Object.values(slots[0]).filter(p => p !== undefined).length > 0) data[id].fusion = slots;
+    if (Object.values(slots[0]).filter(p => p !== undefined).length > 0) fusionData[id].fusion = slots;
     
-    data[id].origin = shard.origin !== "—" ? shard.origin.split(", ") : undefined;
-    
-    data[id].origin = data[id].origin?.map((name)=>{ return "SHARD_" + name.toUpperCase().replaceAll(" ", "_"); }) ?? undefined;
+    fusionData[id].origin = shard.origin !== "—" ? shard.origin.split(", ") : undefined;
+    fusionData[id].origin = fusionData[id].origin?.map((name)=>{ return "SHARD_" + name.replaceAll(" ", "_"); }) ?? undefined;
 
 }
 
-console.log(data);
+console.log(fusionData);

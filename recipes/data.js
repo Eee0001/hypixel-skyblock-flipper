@@ -4,65 +4,56 @@
 
 // (Run in the console of the urls webpage then paste data into data.json)
 
-const successfullRequests = {};
+const recipeData = {};
 
-const recipes = {};
-    
-const ids = [...document.getElementById("mw-whatlinkshere-list").children].map((el)=>{
-    return el.children[0].children[0].href.split("/").at(-1);
-}).filter((str)=>{ return str.toUpperCase() === str; });
+const listData = [...document.getElementById("mw-whatlinkshere-list").children]
+    .map((element)=>{ return element.getElementsByTagName("a")[0].href.split("/").at(-1); })
+    .filter((id)=>{ return id.toUpperCase() === id; });
 
-// (If rate limit hit run the following code in the same webpage console after waiting a bit)
-
-let error = false;
-
-for (let id of ids) {
-
-    if (successfullRequests[id]) continue; 
-    if (rateLimitHit) break;
-    
-    console.log(Object.keys(recipes).length + " Recipes Fetched");
+for (let id of listData) {
+    if (recipeData[id]) continue;
     
     await fetch("https://wiki.hypixel.net/Template:Recipe_Tree/" + id)
-        .then((response)=>{ 
-            if (response.status === 200) successfullRequests[id] = true; 
-            if (response.status !== 200) error = true;
-            return response.text(); 
-        })
+        .then((response)=>{ return response.text(); })
         .then((result)=>{
         
-            let parser = new DOMParser();
-            let container = parser.parseFromString(result, "text/html");
+            let page = new DOMParser().parseFromString(result, "text/html");
             
-            let tables = container.body.getElementsByClassName("wikitable");
+            let tables = page.body.getElementsByClassName("wikitable");
             if (tables.length < 2) return;
             
             let table = tables[0];
             
-            recipes[id] = [];
+            id = id.replaceAll("ENCHANTED_BOOK_", "ENCHANTMENT_");
+            
+            recipeData[id] = [];
             
             for (let i = 1; i < table.rows.length; i++) {
                 if (table.rows[i].cells[0].textContent === "Stranded") continue;
-                
-                let element = table.rows[i].cells[1].children[0];
             
-                let recipe = { result: 0, items: [] };
+                let recipe = { amount: 0, items: [] };
                 
-                recipe.result = Number(element.children[0].textContent.split(" ")[0]);
+                recipe.amount = Number(table.getElementsByClassName("color-green")[i - 1].textContent.split(" ")[0]);
                 
-                let list = element.children[1];
+                let valid = true;
                 
-                for (let point of list.children) {
+                for (let point of table.rows[i].getElementsByTagName("ul")[0].children) {
+                
                     recipe.items.push({
-                        amount: Number(point.textContent.split(" ")[0]),
-                        item: point.children[1].textContent
+                        amount: Number(point.textContent.split(" ")[0].replaceAll(",", "")),
+                        item: point.getElementsByTagName("a")[1].textContent
                     });
+                    
+                    valid = recipe.items.at(-1).amount > 0;
+                
                 }
                 
-                recipes[id].push(recipe);
+                if (valid) recipeData[id].push(recipe);
             
             }
         
         });
-
+        
+        console.log(Object.keys(recipeData).length + " Recipes Fetched");
+        
 }
