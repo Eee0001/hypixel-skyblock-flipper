@@ -24,7 +24,7 @@ const origins = {};
         
         let textData = result2.split("|stranded")[0].replace(/^(?!\|(?:in|out)).*(?:\n|)/gm, "").trim()
             .replace(/(?:!sb,,coin.*:&.)(.*)(?: Coin)(?:.*)/gm, "COINS,$1") // Format coins
-            .replace(/{{(.*)}}/gm, match => match.replace(/{|\|lore|}/g, "").replace(/\||\//g, "_").toUpperCase()) // Format items
+            .replace(/{{(.*)}}/gm, match => match.replace(/{|\|lore|\|min|}/g, "").replace(/\||\//g, "_").toUpperCase()) // Format items
             .split(/(?<=\|out.*)\n/gm);
         
         for (let text of textData) {
@@ -80,7 +80,7 @@ const origins = {};
         
         let textData = result2.split("|stranded")[0].replace(/^(?!\|(?:in|out|duration)).*(?:\n|)/gm, "").trim()
             .replace(/(?:!sb,,coin.*:&.)(.*)(?: Coin)(?:.*)/gm, "COINS,$1") // Format coins
-            .replace(/{{(.*)}}/gm, match => match.replace(/{|\|lore|}/g, "").replace(/\||\//g, "_").toUpperCase()) // Format items
+            .replace(/{{(.*)}}/gm, match => match.replace(/{|\|lore|\|min|}/g, "").replace(/\||\//g, "_").toUpperCase()) // Format items
             .split(/(?<=\|out.*)\n/gm);
         
         for (let text of textData) {
