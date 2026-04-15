@@ -14,7 +14,7 @@ const origins = {};
     
     const page = new DOMParser().parseFromString(result, "text/html");
     
-    // Might want to unfliter this at a later date if missing recipes are noticed in the second format (N)
+    // Might want to unfliter this at a later date if missing recipes are noticed in the second format
     const urls = [...page.querySelectorAll("bdi > a")].map(element => element.href).filter(url => url.includes("Recipe/"));
     
     for (let url of urls) {
@@ -22,34 +22,32 @@ const origins = {};
         let response2 = await fetch("https://wiki.hypixel.net/index.php?title=" + url.split("/").slice(3).join("/") + "&action=raw");
         let result2 = await response2.text();
         
-        // Maybe do the recipe split a bit later
-        let textData = result2.split("|stranded")[0].replace(/^(?!\|(?:in|out)).*(?:\n|)/gm, "").trim().split(/(?<=\|out.*)\n/gm);
+        let textData = result2.split("|stranded")[0].replace(/^(?!\|(?:in|out)).*(?:\n|)/gm, "").trim()
+            .replace(/(?:!sb,,coin.*:&.)(.*)(?: Coin)(?:.*)/gm, "COINS,$1") // Format coins
+            .replace(/{{(.*)}}/gm, match => match.replace(/{|\|lore|}/g, "").replace(/\||\//g, "_").toUpperCase()) // Format items
+            .split(/(?<=\|out.*)\n/gm);
         
         for (let text of textData) {
         
             let recipe = {type: "craft", time: 0, amount: 0, items: {}};
-            
-            text = text.replace(/{{(.*)}}/gm, match => match.replace(/{|\|lore|}/g, "").replace(/\||\//g, "_").toUpperCase());
-            text = text.replace(/(?:!sb,,coin.*:&.)(.*)(?: Coin)(?:.*)/gm, "COINS,$2");
 
-            let inputs = text.match(/^\|in.*/gm)?.map(input => input.split("=")[1].trim().split(",")) ?? [];
-            
-            for (let input of inputs) { 
-                recipe.items[input[0]] = (recipe.items[input[0]] ?? 0) + (Number(input[1]) || 1);
-            }
-            
+            // Handle recipe item inputs
+            (text.match(/^\|in.*/gm)?.map(input => input.split("=")[1].trim().split(",")) ?? []).forEach(([id, amount]) => {
+                recipe.items[id] = (recipe.items[id] ?? 0) + (Number(amount) || 1);
+            });
             recipe.items = Object.entries(recipe.items).map(([id, amount]) => ({id, amount}));
             
-            let output = text.match(/^\|out.*/gm)?.[0].split("=")[1].trim().split(",") ?? [];
+            // Handle recipe item output
+            let output = text.match(/^\|out.*/gm)?.[0].split("=")[1].trim();
             
             if (output) {
+                let [id, amount] = output.split(",");
             
-                recipe.amount = Number(output[1]) || 1;
+                recipe.amount = Number(amount) || 1;
                 
-                if (!origins[output[0]]) origins[output[0]] = [];
+                origins[id] ??= [];
                 
-                origins[output[0]].push(recipe);
-            
+                origins[id].push(recipe);
             }
             
             console.log(Object.values(origins).flat().length + " Recipes Fetched");
@@ -72,49 +70,47 @@ const origins = {};
     
     const page = new DOMParser().parseFromString(result, "text/html");
     
-    // Might want to unfliter this at a later date if missing recipes are noticed in the second format (Y)
+    // Might want to unfliter this at a later date if missing recipes are noticed in the second format
     const urls = [...page.querySelectorAll("bdi > a")].map(element => element.href).filter(url => url.includes("Recipe/"));
     
-    for (url of urls) {
+    for (let url of urls) {
     
         let response2 = await fetch("https://wiki.hypixel.net/index.php?title=" + url.split("/").slice(3).join("/") + "&action=raw");
         let result2 = await response2.text();
         
-        // Maybe do the recipe split a bit later
-        let textData = result2.split("|stranded")[0].replace(/^(?!\|(?:in|out|duration)).*(?:\n|)/gm, "").trim().split(/(?<=\|out.*)\n/gm);
+        let textData = result2.split("|stranded")[0].replace(/^(?!\|(?:in|out|duration)).*(?:\n|)/gm, "").trim()
+            .replace(/(?:!sb,,coin.*:&.)(.*)(?: Coin)(?:.*)/gm, "COINS,$1") // Format coins
+            .replace(/{{(.*)}}/gm, match => match.replace(/{|\|lore|}/g, "").replace(/\||\//g, "_").toUpperCase()) // Format items
+            .split(/(?<=\|out.*)\n/gm);
         
         for (let text of textData) {
         
             let recipe = {type: "forge", time: 0, amount: 0, items: {}};
             
-            text = text.replace(/{{(.*)}}/gm, match => match.replace(/{|\|lore|}/g, "").replace(/\||\//g, "_").toUpperCase());
-            text = text.replace(/(?:!sb,,coin.*:&.)(.*)(?: Coin)(?:.*)/gm, "COINS,$2");
+            // Handle recipe duration
+            (text.match(/^\|duration.*/gm)?.[0].split("=")[1].trim() ?? "")
+                .replace(/(\d+)(?= day)/g, (match, time) => { recipe.time += Number(time) * 86400; })
+                .replace(/(\d+)(?= hour)/g, (match, time) => { recipe.time += Number(time) * 3600; })
+                .replace(/(\d+)(?= minute)/g, (match, time) => { recipe.time += Number(time) * 60; })
+                .replace(/(\d+)(?= second)/g, (match, time) => { recipe.time += Number(time) * 1; });
 
-            let inputs = text.match(/^\|in.*/gm)?.map(input => input.split("=")[1].trim().split(",")) ?? [];
-            
-            for (let input of inputs) { 
-                recipe.items[input[0]] = (recipe.items[input[0]] ?? 0) + (Number(input[1]) || 1);
-            }
-            
+            // Handle recipe item inputs
+            (text.match(/^\|in.*/gm)?.map(input => input.split("=")[1].trim().split(",")) ?? []).forEach(([id, amount]) => {
+                recipe.items[id] = (recipe.items[id] ?? 0) + (Number(amount) || 1);
+            });
             recipe.items = Object.entries(recipe.items).map(([id, amount]) => ({id, amount}));
             
-            let duration = text.match(/^\|duration.*/gm)?.[0].split("=")[1].trim() ?? "";
-            
-            duration.replace(/(\d+)(?= day)/g, (match, time) => { recipe.time += Number(time) * 86400; })
-            duration.replace(/(\d+)(?= hour)/g, (match, time) => { recipe.time += Number(time) * 3600; })
-            duration.replace(/(\d+)(?= minute)/g, (match, time) => { recipe.time += Number(time) * 60; })
-            duration.replace(/(\d+)(?= second)/g, (match, time) => { recipe.time += Number(time) * 1; });
-            
-            let output = text.match(/^\|out.*/gm)?.[0].split("=")[1].trim().split(",") ?? [];
+            // Handle recipe item output
+            let output = text.match(/^\|out.*/gm)?.[0].split("=")[1].trim();
             
             if (output) {
+                let [id, amount] = output.split(",");
             
-                recipe.amount = Number(output[1]) || 1;
+                recipe.amount = Number(amount) || 1;
                 
-                if (!origins[output[0]]) origins[output[0]] = [];
+                origins[id] ??= [];
                 
-                origins[output[0]].push(recipe);
-            
+                origins[id].push(recipe);
             }
             
             console.log(Object.values(origins).flat().length + " Recipes Fetched");
