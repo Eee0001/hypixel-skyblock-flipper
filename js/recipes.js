@@ -3,7 +3,7 @@
 //--------------------------------------------------------------------------------
 
 async function getRecipeData () {
-  let data = await fetchJSON("./data/recipes.json");
+  let data = await fetchJSON("../data/recipes.json");
   
   if (data) console.log(`${Date.now()} | Recipe data fetched :)`);
   else console.log(`${Date.now()} | Recipe data not fetched :(`);
