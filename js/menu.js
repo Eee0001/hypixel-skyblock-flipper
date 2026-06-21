@@ -1,8 +1,4 @@
 //--------------------------------------------------------------------------------
-// IMPORTS
-//--------------------------------------------------------------------------------
-
-//--------------------------------------------------------------------------------
 // CLASS
 //--------------------------------------------------------------------------------
 
@@ -12,7 +8,8 @@ class Menu {
 
   constructor () {
     this.#ids = [
-      "menu", "toggle-menu-btn"
+      "menu", "toggle-menu-btn", "WeightActive", "WeightValue", "WeightList",
+      "WeightReset", "FlipperCalculate"
     ];
 
     this.#elements = {};
@@ -21,7 +18,10 @@ class Menu {
       this.#elements[id] = document.getElementById(id);
     }
 
-    this.#dataKeys = {};
+    this.#dataKeys = {
+      WeightActive: { target: "weights", property: "activeWeight" },
+      WeightValue: { target: "weights", property: "activeValue" },
+    };
 
     this.#previousData = {};
   }
@@ -29,7 +29,9 @@ class Menu {
   //--------------------------------------
 
   #getDataTargets (app) {
-    return {};
+    return {
+      weights: app.weights
+    };
   }
 
   //--------------------------------------
@@ -39,7 +41,7 @@ class Menu {
       const element = this.#elements[id];
       
       element.onchange = (e) => {
-        const dataTargets = this.#getDataTargets(missionManager);
+        const dataTargets = this.#getDataTargets(app);
 
         const dataTarget = dataTargets[dataKey.target];
         if (!dataTarget) return; 
@@ -49,7 +51,7 @@ class Menu {
         }
 
         if (element.type === "select-one") {
-          dataTarget[dataKey.property] = Number(element.value);
+          dataTarget[dataKey.property] = element.value;
         }
 
         if (element.type === "checkbox") {
@@ -60,6 +62,18 @@ class Menu {
 
     this.#elements["toggle-menu-btn"].onclick = ()=>{ 
       this.#elements["menu"].classList.toggle("hidden"); 
+    };
+    
+    for (let weight of app.weights.ids) {
+      this.#elements["WeightActive"].innerHTML += `<option value="${weight}">${weight}</option>`;
+    }
+    
+    this.#elements["WeightList"].onclick = ()=>{
+      app.weights.viewList();
+    };
+    
+    this.#elements["WeightReset"].onclick = ()=>{
+      app.weights.initValues(); app.flipper.weights = app.weights.values;
     };
   }
 

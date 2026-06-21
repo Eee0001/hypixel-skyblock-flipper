@@ -14,35 +14,25 @@
     </section>
 
     <section id="menu">
-      <span>Weight Values</span>
+      <span>Weights</span>
       
       <hr>
       
-      <label for="WeightCoins">Coins       :</label>
-      <input id="WeightCoins" type="number">
-      <label for="WeightNorthStars">North Stars :</label>
-      <input id="WeightNorthStars" type="number">
-      <label for="WeightGems">Gems        :</label>
-      <input id="WeightGems" type="number">
-      <label for="WeightBits">Bits        :</label>
-      <input id="WeightBits" type="number">
-      <label for="WeightCopper">Copper      :</label>
-      <input id="WeightCopper" type="number">
-      <label for="WeightChocolate">Chocolate   :</label>
-      <input id="WeightChocolate" type="number">
-      <label for="WeightTime">Time        :</label>
-      <input id="WeightTime" type="number">
+      <label for="WeightActive">Active Weight :</label>
+      <select id="WeightActive"></select>
       
-      <hr><br>
+      <label for="WeightValue">Active Value  :</label>
+      <input id="WeightValue" type="number">
       
-      <span>Data</span>
+      <br>
       
-      <hr>
+      <label for="WeightList">Weights List  :</label>
+      <input id="WeightList" type="button" value="View">
       
-      <label for="DataBazaar">Get Bazaar   :</label>
-      <input id="DataBazaar" type="button" value="Fetch">
-      <label for="DataAuctions">Get Auctions :</label>
-      <!-- <input id="DataAuctions" type="button" value="Fetch"> -->
+      <br>
+      
+      <label for="WeightReset">Reset Weights :</label>
+      <input id="WeightReset" type="button" value="Reset">
       
       <hr><br>
       
@@ -50,11 +40,6 @@
       
       <hr>
       
-      <label for="FlipperSorting">Sorting Method  :</label>
-      <select id="FlipperSorting">
-        <option value="1">High/Low</option>
-        <option value="-1">Low/High</option>
-      </select>
       <label for="FlipperCalculate">Calculate Flips :</label>
       <input id="FlipperCalculate" type="button" value="Calculate">
       
@@ -63,6 +48,12 @@
     </section>
 
     <!-- SCRIPTS -->
+    <script src="js/utils.js"></script>
+    <script src="js/weights.js"></script>
+    <script src="js/recipes.js"></script>
+    <script src="js/bazaar.js"></script>
+    <script src="js/data.js"></script>
+    <script src="js/flipper.js"></script>
     <script src="js/menu.js"></script>
     <!-- SCRIPTS -->
     
